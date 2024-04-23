@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MONGO_URL, MONGO_DB_NAME } from './config';
+import { MONGO_DB_NAME, DB_URL } from './config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -9,7 +9,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 
 @Module({
   imports: [
-    MongooseModule.forRoot(MONGO_URL, {
+    MongooseModule.forRoot(DB_URL, {
       dbName: MONGO_DB_NAME,
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
