@@ -18,7 +18,7 @@ jobs:
         run: yarn install
 
       - name: Run tests
-        run: yarn test:cov
+        run: yarn test
 
   build:
     name: Build Application
