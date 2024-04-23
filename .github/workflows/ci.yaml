@@ -13,16 +13,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 18.x, 16.x]
+        node-version: [20.x]
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install
@@ -36,12 +30,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14.x
-          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install
