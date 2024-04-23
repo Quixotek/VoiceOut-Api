@@ -84,22 +84,22 @@ describe('ReportResolver', () => {
     expect(result.type).toEqual(report.type);
     expect(result.description).toEqual(report.description);
 
-    await service.deleteReport(result.id);
+    await resolver.deleteReport(result.id);
   });
 
   it('should update a report', async () => {
-    const createReportInput: ReportUpdateInput = {
+    const updateReportInput: ReportUpdateInput = {
       id: '1',
       type: 'title',
       description: 'description',
     };
 
-    const newReport = await service.createReport({
+    const newReport = await resolver.createReport({
       type: 'title',
       description: 'description',
     });
 
-    const report = await service.updateReport(createReportInput);
+    const report = await service.updateReport(updateReportInput);
     const result = await resolver.updateReport({
       id: newReport.id,
       type: 'new title',
@@ -117,7 +117,7 @@ describe('ReportResolver', () => {
     expect(result.type).toEqual('new title');
     expect(result.description).toEqual('new description');
 
-    await service.deleteReport(result.id);
+    await resolver.deleteReport(result.id);
   });
 
   it('should delete a report', async () => {

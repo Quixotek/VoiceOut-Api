@@ -41,7 +41,7 @@ describe('ReportService', () => {
     if (module) {
       await module.close();
     }
-  }, 60000);
+  });
 
   it('createReport should create a new report', async () => {
     const createReportInput: ReportCreateInput = {
@@ -61,6 +61,8 @@ describe('ReportService', () => {
 
     await service.deleteReport(createdReport.id);
   });
+
+  
 
   it('updateReport should update a report', async () => {
     const createReportInput: ReportCreateInput = {
