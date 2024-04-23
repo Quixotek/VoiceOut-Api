@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MONGO_DB_NAME, DB_URL } from './config';
+import { MONGO_DB_NAME, MONGO_URL } from './config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { ReportModule } from './report/report.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(DB_URL, {
+    MongooseModule.forRoot(MONGO_URL, {
       dbName: MONGO_DB_NAME,
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -21,6 +22,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
         plugins: [ApolloServerPluginLandingPageLocalDefault()],
       }),
     }),
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,5 @@
-import { config } from 'dotenv';
-
-config();
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config();
 
 export const { PORT, MONGO_URL, MONGO_DB_NAME, NODE_ENV, MONGO_URL_TEST } =
   process.env;
