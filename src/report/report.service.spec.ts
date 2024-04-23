@@ -3,6 +3,7 @@ import { ReportService } from './report.service';
 import { ReportSchema, Report } from './report.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ReportCreateInput, ReportUpdateInput } from './report.types';
+import mongoose from 'mongoose';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
@@ -41,6 +42,8 @@ describe('ReportService', () => {
     if (module) {
       await module.close();
     }
+
+    mongoose.connection.close();
   });
 
   it('createReport should create a new report', async () => {
@@ -61,8 +64,6 @@ describe('ReportService', () => {
 
     await service.deleteReport(createdReport.id);
   });
-
-  
 
   it('updateReport should update a report', async () => {
     const createReportInput: ReportCreateInput = {
