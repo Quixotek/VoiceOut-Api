@@ -1,7 +1,20 @@
-import { Resolver } from '@nestjs/graphql';
+import { Args, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { UserService } from './user.service';
+import { User } from './user.schema';
 
-@Resolver()
+@Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
+
+  @Query(() => User)
+  async viewer(@Args() id: string) {
+    return await this.userService.findUserById(id); //TODO currentUser
+  }
+
+  @ResolveField(() => String)
+  async userId(@Args() id: string) {
+    const user = await this.userService.findUserById(id); //TODO clean this, just testing ResolveField
+
+    return user.id;
+  }
 }

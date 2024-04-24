@@ -51,14 +51,18 @@ describe('UserService', () => {
     }
   });
 
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
   describe('create', () => {
     it('should create a new user', async () => {
+      //TODO how to mock hashPassword helper??
       jest.spyOn(userModel, 'create').mockResolvedValueOnce(mockUser as any);
 
       const user = await service.create(newUser as CreateUserInput);
-      expect(user).toEqual(mockUser);
 
-      jest.clearAllMocks();
+      expect(user).toEqual(mockUser);
     });
 
     it('should throw an exception if create throws an exception', async () => {
@@ -69,8 +73,6 @@ describe('UserService', () => {
       await expect(service.create(newUser as CreateUserInput)).rejects.toThrow(
         new HttpException('create error', HttpStatus.BAD_REQUEST),
       );
-
-      jest.clearAllMocks();
     });
   });
 
@@ -82,8 +84,6 @@ describe('UserService', () => {
 
       expect(userModel.findOne).toHaveBeenCalledWith({ email: mockUser.email });
       expect(result).toEqual(mockUser);
-
-      jest.clearAllMocks();
     });
 
     it('should return NotFoundError when user is not found', async () => {
@@ -94,8 +94,6 @@ describe('UserService', () => {
       );
 
       expect(userModel.findOne).toHaveBeenCalledWith({ email: mockUser.email });
-
-      jest.clearAllMocks();
     });
   });
 
@@ -107,8 +105,6 @@ describe('UserService', () => {
 
       expect(userModel.findOne).toHaveBeenCalledWith({ id: mockUser.id });
       expect(result).toEqual(mockUser);
-
-      jest.clearAllMocks();
     });
 
     it('should retrun Not Found Exception when user is not found', async () => {
@@ -119,8 +115,6 @@ describe('UserService', () => {
       );
 
       expect(userModel.findOne).toHaveBeenCalledWith({ id: mockUser.id });
-
-      jest.clearAllMocks();
     });
   });
 });

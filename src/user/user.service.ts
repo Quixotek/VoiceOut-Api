@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
 import { Model } from 'mongoose';
 import { CreateUserInput } from './user.types';
+import { hashPassword } from '../utils/bcrypt';
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,14 @@ export class UserService {
   ) {}
 
   async create(input: CreateUserInput) {
-    const user = await this.userModel.create(input);
+    const { password } = input;
+
+    const hashedPass = await hashPassword(password); //TODO research how to mock this kind of function
+
+    const user = await this.userModel.create({
+      ...input,
+      password: hashedPass,
+    });
     return user;
   }
 
