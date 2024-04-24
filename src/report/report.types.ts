@@ -24,4 +24,8 @@ export class ReportCreateInput {
 }
 
 @InputType()
-export class ReportUpdateInput extends PartialType(ReportCreateInput) {}
+export class ReportUpdateInput extends PartialType(ReportCreateInput) {
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+}
