@@ -12,8 +12,7 @@ export class ReportService {
   ) {}
 
   async createReport(createReportInput: ReportCreateInput): Promise<Report> {
-    const report = new this.reportModel(createReportInput);
-    return report.save();
+    return await this.reportModel.create(createReportInput);
   }
 
   async updateReport(updateReportInput: ReportUpdateInput): Promise<Report> {
@@ -26,5 +25,9 @@ export class ReportService {
 
   async deleteReport(id: string): Promise<Report> {
     return this.reportModel.findOneAndDelete({ id });
+  }
+
+  async getReportById(id: string): Promise<Report> {
+    return this.reportModel.findOne({ id });
   }
 }

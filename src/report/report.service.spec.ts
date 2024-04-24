@@ -1,107 +1,177 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReportService } from './report.service';
-import { ReportSchema, Report } from './report.schema';
-import { MongooseModule } from '@nestjs/mongoose';
+import { Report, ReportDocument } from './report.schema';
+import { getModelToken } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { ReportCreateInput, ReportUpdateInput } from './report.types';
-import mongoose from 'mongoose';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('dotenv').config();
-jest.useRealTimers();
-
-const mockReportModel = {
-  new: jest.fn(() => {
-    return {
-      ...mockReportModel,
-    };
-  }),
-  save: jest.fn(() => Promise.resolve({ ...mockReportModel })),
-};
 
 describe('ReportService', () => {
   let service: ReportService;
-  let module: TestingModule;
+  let model: Model<ReportDocument>;
 
-  beforeAll(async () => {
-    module = await Test.createTestingModule({
-      imports: [
-        MongooseModule.forRoot(process.env.MONGO_URL_TEST, {
-          dbName: process.env.MONGO_DB_NAME,
-        }),
-        MongooseModule.forFeature([
-          { name: Report.name, schema: ReportSchema },
-        ]), // Add this line
+  const mockReport = {
+    _id: '1',
+    id: '1',
+    type: 'title',
+    description: 'description',
+    locations: ['location1', 'location2'],
+    attachments: ['attachment1', 'attachment2'],
+    isReviewed: false,
+  };
+
+  const mockReportService = {
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    findOneAndDelete: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ReportService,
+        {
+          provide: getModelToken(Report.name),
+          useValue: mockReportService,
+        },
       ],
-      providers: [ReportService],
     }).compile();
 
     service = module.get<ReportService>(ReportService);
+    model = module.get<Model<ReportDocument>>(getModelToken(Report.name));
   });
 
-  afterAll(async () => {
-    if (module) {
-      await module.close();
-    }
+  describe('getReportById', () => {
+    it('should return the report', async () => {
+      jest.spyOn(model, 'findOne').mockResolvedValue(mockReport as any);
 
-    mongoose.connection.close();
+      const result = await service.getReportById('1');
+
+      expect(result).toEqual(mockReport);
+      expect(model.findOne).toHaveBeenCalledWith({ id: '1' });
+
+      jest.clearAllMocks();
+    });
+
+    it('should throw an error if findOne throws an exception', async () => {
+      jest.spyOn(model, 'findOne').mockImplementation(() => {
+        throw new Error('findOne exception');
+      });
+
+      await expect(service.getReportById('1')).rejects.toThrow(
+        new Error('findOne exception'),
+      );
+
+      jest.clearAllMocks();
+    });
   });
 
-  it('createReport should create a new report', async () => {
-    const createReportInput: ReportCreateInput = {
-      type: 'This is a test report',
-      description: 'This is a description for the test report',
-    };
+  describe('createReport', () => {
+    it('should create and return new report', async () => {
+      jest
+        .spyOn(model, 'create')
+        .mockImplementationOnce(() => Promise.resolve(mockReport as any));
 
-    const expectedReport = { ...createReportInput }; // Assume saved report doesn't change data
-    mockReportModel.new.mockReturnValue(expectedReport);
-    mockReportModel.save.mockResolvedValueOnce(expectedReport);
+      const reportCreateInput: ReportCreateInput = {
+        type: 'title',
+        description: 'description',
+      };
 
-    const createdReport = await service.createReport(createReportInput);
-    expect(createdReport.id).toBeDefined();
-    expect(createdReport.type).toEqual(createReportInput.type);
-    expect(createdReport.description).toEqual(createReportInput.description);
-    expect(createdReport.createdAt).toBeDefined();
+      const result = await service.createReport(reportCreateInput);
 
-    await service.deleteReport(createdReport.id);
+      expect(result).toEqual(mockReport);
+      expect(model.create).toHaveBeenCalledWith(reportCreateInput);
+
+      jest.clearAllMocks();
+    });
+
+    it('should throw an error if create throws an exception', async () => {
+      jest.spyOn(model, 'create').mockImplementation(() => {
+        throw new Error('create exception');
+      });
+
+      await expect(
+        service.createReport({
+          type: 'title',
+          description: 'description',
+        }),
+      ).rejects.toThrow(new Error('create exception'));
+
+      jest.clearAllMocks();
+    });
   });
 
-  it('updateReport should update a report', async () => {
-    const createReportInput: ReportCreateInput = {
-      type: 'This is a test report',
-      description: 'This is a description for the test report',
+  describe('updateReport', () => {
+    const updatedReport = {
+      ...mockReport,
+      type: 'new title',
+      description: 'new description',
     };
 
-    const createdReport = await service.createReport(createReportInput);
-
-    const updateReportInput: ReportUpdateInput = {
-      id: createdReport.id,
-      type: 'This is a test report updated',
-      description: 'This is a description for the test report updated',
+    const reportUpdateInput: ReportUpdateInput = {
+      id: '1',
+      type: 'new title',
+      description: 'new description',
     };
 
-    const updatedReport = await service.updateReport(updateReportInput);
+    it('should update and return the report', async () => {
+      jest
+        .spyOn(model, 'findOneAndUpdate')
+        .mockResolvedValue(updatedReport as any);
 
-    expect(updatedReport.id).toEqual(createdReport.id);
-    expect(updatedReport.type).toBe(updateReportInput.type);
-    expect(updatedReport.description).toBe(updateReportInput.description);
-    expect(updatedReport.createdAt).toEqual(createdReport.createdAt);
+      const result = await service.updateReport(reportUpdateInput);
 
-    await service.deleteReport(createdReport.id);
+      expect(result).toEqual(updatedReport);
+      expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+        { id: '1' },
+        reportUpdateInput,
+        { new: true },
+      );
+
+      jest.clearAllMocks();
+    });
+
+    it('should throw an error if findOneAndUpdate throws an exception', async () => {
+      jest.spyOn(model, 'findOneAndUpdate').mockImplementation(() => {
+        throw new Error('findOneAndUpdate exception');
+      });
+
+      await expect(
+        service.updateReport({
+          id: '1',
+          type: 'new title',
+          description: 'new description',
+        }),
+      ).rejects.toThrow(new Error('findOneAndUpdate exception'));
+
+      jest.clearAllMocks();
+    });
   });
 
-  it('deleteReport should delete a report', async () => {
-    const createReportInput: ReportCreateInput = {
-      type: 'This is a test report',
-      description: 'This is a description for the test report',
-    };
+  describe('deleteReport', () => {
+    it('should delete and return the report', async () => {
+      jest
+        .spyOn(model, 'findOneAndDelete')
+        .mockResolvedValue(mockReport as any);
 
-    const createdReport = await service.createReport(createReportInput);
+      const result = await service.deleteReport('1');
 
-    const deletedReport = await service.deleteReport(createdReport.id);
+      expect(result).toEqual(mockReport);
+      expect(model.findOneAndDelete).toHaveBeenCalledWith({ id: '1' });
 
-    expect(deletedReport.id).toEqual(createdReport.id);
-    expect(deletedReport.type).toEqual(createdReport.type);
-    expect(deletedReport.description).toEqual(createdReport.description);
-    expect(deletedReport.createdAt).toEqual(createdReport.createdAt);
+      jest.clearAllMocks();
+    });
+
+    it('should throw an error if findOneAndDelete throws an exception', async () => {
+      jest.spyOn(model, 'findOneAndDelete').mockImplementation(() => {
+        throw new Error('findOneAndDelete exception');
+      });
+
+      await expect(service.deleteReport('1')).rejects.toThrow(
+        new Error('findOneAndDelete exception'),
+      );
+
+      jest.clearAllMocks();
+    });
   });
 });
