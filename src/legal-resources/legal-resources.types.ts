@@ -1,5 +1,5 @@
 import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { PaginationInput } from 'src/utils/common.types';
+import { PaginationInput } from '../utils/common.types';
 
 @InputType()
 export class LegalResourcesCreateInput {

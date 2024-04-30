@@ -11,7 +11,6 @@ import {
   LegalResourcesUpdateInput,
 } from './legal-resources.types';
 import { UserService } from '../user/user.service';
-import { escape } from 'querystring';
 import { escapeRegExp, get, isEmpty } from 'lodash';
 
 @Injectable()
@@ -52,7 +51,7 @@ export class LegalResourcesService {
           {
             $group: {
               _id: null,
-              totalDocs: {
+              total: {
                 $sum: 1,
               },
             },
@@ -85,6 +84,10 @@ export class LegalResourcesService {
 
   async getLegalResourcesById(id: string) {
     const legalResource = await this.legalResourcesRepo.findOne({ id });
+
+    if (isEmpty(legalResource)) {
+      throw new HttpException('No legal resource', HttpStatus.NOT_FOUND);
+    }
 
     return legalResource;
   }
@@ -119,6 +122,7 @@ export class LegalResourcesService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async deleteLegalResources(id: string, userId: string) {
     try {
       await this.legalResourcesRepo.findOneAndDelete({ id });
