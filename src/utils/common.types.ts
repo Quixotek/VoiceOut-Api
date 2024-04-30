@@ -11,6 +11,12 @@ export class PaginationInput {
 
   @Field(() => String, { nullable: true })
   q?: string;
+
+  @Field(() => String, { defaultValue: 'createdAt' })
+  sortBy?: string;
+
+  @Field(() => String, { defaultValue: 'desc' })
+  sort?: string;
 }
 
 @ObjectType()

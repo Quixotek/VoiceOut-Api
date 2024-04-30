@@ -4,13 +4,15 @@ import {
   LegalResources,
   LegalResourcesDocument,
 } from './legal-resources.schema';
-import { Model } from 'mongoose';
+import { Model, PipelineStage } from 'mongoose';
 import {
   LegalResourcesCreateInput,
   LegalResourcesPaginationInput,
   LegalResourcesUpdateInput,
 } from './legal-resources.types';
 import { UserService } from '../user/user.service';
+import { escape } from 'querystring';
+import { escapeRegExp, get, isEmpty } from 'lodash';
 
 @Injectable()
 export class LegalResourcesService {
@@ -19,9 +21,73 @@ export class LegalResourcesService {
     private readonly legalResourcesRepo: Model<LegalResourcesDocument>,
     private readonly userService: UserService,
   ) {}
-  async getLegalResources(query: LegalResourcesPaginationInput) {}
+  async getLegalResources(query: LegalResourcesPaginationInput) {
+    const { page, limit, q, sort, sortBy } = query;
 
-  async getLegalResourcesById(id: string) {}
+    const aggregate: PipelineStage[] = [];
+
+    const match: PipelineStage.Match = {
+      $match: {},
+    };
+
+    const sorting: PipelineStage.Sort = {
+      $sort: {
+        [sortBy]: sort?.toLocaleLowerCase() === 'asc' ? 1 : -1,
+      },
+    };
+
+    if (q) {
+      match['$match']['$text'] = { $search: escapeRegExp(q) };
+    }
+
+    if (!isEmpty(match.$match)) {
+      aggregate.push(match);
+    }
+
+    aggregate.push(sorting);
+
+    aggregate.push({
+      $facet: {
+        meta: [
+          {
+            $group: {
+              _id: null,
+              totalDocs: {
+                $sum: 1,
+              },
+            },
+          },
+          {
+            $addFields: {
+              limit,
+              page,
+            },
+          },
+        ],
+        docs: [
+          {
+            $skip: limit * (page - 1),
+          },
+          {
+            $limit: limit,
+          },
+        ],
+      },
+    });
+
+    const results = await this.legalResourcesRepo.aggregate(aggregate);
+
+    const items = get(results, '[0].docs', []) || [];
+    const meta = get(results, '[0].meta[0]');
+
+    return { items, meta };
+  }
+
+  async getLegalResourcesById(id: string) {
+    const legalResource = await this.legalResourcesRepo.findOne({ id });
+
+    return legalResource;
+  }
 
   async createLegalResources(id: string, input: LegalResourcesCreateInput) {
     const user = await this.userService.findUserById(id);
@@ -38,7 +104,28 @@ export class LegalResourcesService {
     return newLegalResources;
   }
 
-  async updateLegalResources(input: LegalResourcesUpdateInput) {}
+  async updateLegalResources(id: string, input: LegalResourcesUpdateInput) {
+    try {
+      const updatedLegalResources =
+        await this.legalResourcesRepo.findOneAndUpdate(
+          { id },
+          { $set: { ...input } },
+          { new: true },
+        );
 
-  async deleteLegalResources(id: string, userId: string) {}
+      return updatedLegalResources;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async deleteLegalResources(id: string, userId: string) {
+    try {
+      await this.legalResourcesRepo.findOneAndDelete({ id });
+
+      return { message: 'Deleted Legal Resource Successfully' };
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }

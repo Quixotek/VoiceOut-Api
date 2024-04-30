@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { PaginationInput } from 'src/utils/common.types';
 
 @InputType()
@@ -18,15 +18,17 @@ export class LegalResourcesCreateInput {
   @Field(() => String, { nullable: false })
   source: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: false })
   url: string;
 
-  @Field(() => String)
-  notes: string;
+  @Field(() => String, { nullable: false })
+  notes?: string;
 }
 
 @InputType()
-export class LegalResourcesUpdateInput extends LegalResourcesCreateInput {}
+export class LegalResourcesUpdateInput extends PartialType(
+  LegalResourcesCreateInput,
+) {}
 
 @InputType()
 export class LegalResourcesPaginationInput extends PaginationInput {}
