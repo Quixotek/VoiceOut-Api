@@ -8,6 +8,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ReportModule } from './report/report.module';
 import { UserModule } from './user/user.module';
+import { LegalResourcesModule } from './legal-resources/legal-resources.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { UserModule } from './user/user.module';
     }),
     ReportModule,
     UserModule,
+    LegalResourcesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
