@@ -14,7 +14,7 @@ describe('ReportService', () => {
     id: '1',
     type: 'title',
     description: 'description',
-    locations: ['location1', 'location2'],
+    locations: 'location',
     attachments: ['attachment1', 'attachment2'],
     isReviewed: false,
   };

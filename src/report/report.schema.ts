@@ -26,9 +26,9 @@ export class Report {
    * for the data visualization feature in phase 2 of anonymous-reporting feature
    * this fields will only used if the user opt in to provide more information
    */
-  @Field(() => [String], { nullable: 'itemsAndList' })
+  @Field(() => String, { nullable: true })
   @Prop({ required: false })
-  locations?: string[];
+  locations?: string;
 
   @Field(() => [String], { nullable: 'itemsAndList' })
   @Prop({ required: false })

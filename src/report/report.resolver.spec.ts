@@ -41,7 +41,7 @@ describe('ReportResolver', () => {
       const report: ReportCreateInput = {
         type: 'title',
         description: 'description',
-        locations: ['location1', 'location2'],
+        locations: 'location1',
         attachments: ['attachment1', 'attachment2'],
         isReviewed: false,
       };
@@ -56,7 +56,7 @@ describe('ReportResolver', () => {
       const report: ReportCreateInput = {
         type: 'title',
         description: 'description',
-        locations: ['location1', 'location2'],
+        locations: 'location1',
         attachments: ['attachment1', 'attachment2'],
         isReviewed: false,
       };
@@ -96,7 +96,7 @@ describe('ReportResolver', () => {
         id: '1',
         type: 'title',
         description: 'description',
-        locations: ['location1', 'location2'],
+        locations: 'location1',
         attachments: ['attachment1', 'attachment2'],
         isReviewed: false,
       };
