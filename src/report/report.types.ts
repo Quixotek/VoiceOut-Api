@@ -14,9 +14,9 @@ export class ReportCreateInput {
   description: string;
 
   @IsOptional()
-  @IsString({ each: true })
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  locations?: string[];
+  @IsString()
+  @Field(() => String, { nullable: false })
+  locations?: string;
 
   @IsOptional()
   @IsString({ each: true })
